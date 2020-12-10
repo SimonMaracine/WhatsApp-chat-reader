@@ -11,13 +11,53 @@ class Message:
     message: str
 
 
-def read_chat_file(file: str, messages: list[Message]):
+@dataclass
+class ChatData:
+    people: dict[str, int]
+    total_messages: int
+    oldest_message: datetime
+    newest_message: datetime
+
+
+def retrieve_data(messages: list[Message]) -> ChatData:
+    people = {}
+    for message in messages:
+        name = message.person_name
+        if name not in people:
+            people[name] = 0
+        else:
+            people[name] += 1
+
+    return ChatData(
+        people,
+        len(messages),
+        messages[0].date_time,
+        messages[-1].date_time
+    )
+
+
+def is_chat(file_path: str) -> bool:
+    with open(file_path, "r") as file:
+        first_line = file.readline()
+        match = re.match("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{2} (PM|AM) - ", first_line)
+
+        if match is not None:
+            return True
+        else:
+            return False
+
+
+def read_chat_file(file: str) -> list[Message]:
+    messages = []
+
     with open(file, "r") as file:
         while line := file.readline():
             message = _parse_line(line, messages)
             if message is not None:
                 messages.append(message)
                 print(message)
+
+    return messages
 
 
 def _parse_line(line: str, messages: list[Message]) -> Optional[Message]:
