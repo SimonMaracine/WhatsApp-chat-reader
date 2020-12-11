@@ -11,6 +11,9 @@ class MainApplication(tk.Frame):
         super().__init__(root)
         self.root = root
         self.pack(fill="both", expand=True, padx=20, pady=20)
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
 
         self.root.option_add("*tearOff", False)
         self.root.title("WhatsApp Chat Reader")
@@ -28,7 +31,7 @@ class MainApplication(tk.Frame):
 
         # Main frames
         frm_people = tk.Frame(self, relief="ridge", bd=3)
-        frm_people.grid(row=0, column=0, padx=(0, 5))
+        frm_people.grid(row=0, column=0, padx=(0, 5), sticky="nsew")
 
         frm_right_side = tk.Frame(self)
         frm_right_side.grid(row=0, column=1)
@@ -37,7 +40,7 @@ class MainApplication(tk.Frame):
         bar_people = tk.Scrollbar(frm_people, orient="vertical")
         bar_people.pack(side="right", fill="y")
 
-        self.cvs_people = tk.Canvas(frm_people, width=300, borderwidth=0, yscrollcommand=bar_people.set)
+        self.cvs_people = tk.Canvas(frm_people, width=370, borderwidth=0, yscrollcommand=bar_people.set)
         self.cvs_people.pack(side="left", fill="both", expand=True)
         bar_people.configure(command=self.cvs_people.yview)
 
@@ -53,14 +56,14 @@ class MainApplication(tk.Frame):
         frm_oldest_newest = tk.Frame(frm_right_side)
         frm_oldest_newest.grid(row=1, column=0, pady=(0, 20))
         self.var_oldest = tk.StringVar(frm_oldest_newest, "Oldest: n/a")
-        tk.Label(frm_oldest_newest, textvariable=self.var_oldest, font="Times, 12").grid(row=0, column=0)
+        tk.Label(frm_oldest_newest, textvariable=self.var_oldest, font="Times, 13").grid(row=0, column=0)
         self.var_newest = tk.StringVar(frm_oldest_newest, "Newest: n/a")
-        tk.Label(frm_oldest_newest, textvariable=self.var_newest, font="Times, 12").grid(row=1, column=0)
+        tk.Label(frm_oldest_newest, textvariable=self.var_newest, font="Times, 13").grid(row=1, column=0)
 
         frm_buttons = tk.Frame(frm_right_side)
         frm_buttons.grid(row=2, column=0)
-        tk.Button(frm_buttons, text="Timeline", command=None, font="Times, 12").grid(row=0, column=0, pady=(0, 8))
-        tk.Button(frm_buttons, text="Day", command=None, font="Times, 12").grid(row=1, column=0)
+        tk.Button(frm_buttons, text="Timeline", command=None, font="Times, 13").grid(row=0, column=0, pady=(0, 8))
+        tk.Button(frm_buttons, text="Day", command=None, font="Times, 13").grid(row=1, column=0)
 
         self.messages: list[Message] = []
 
@@ -76,8 +79,8 @@ class MainApplication(tk.Frame):
             return
 
         if not is_chat(file_path):
-            print("This file is not a chat file", file=sys.stderr)
-            messagebox.showerror("Invalid Chat", "This file is not a chat file.", parent=self.root)
+            print("This is not a chat file", file=sys.stderr)
+            messagebox.showerror("Invalid Chat", "This is not a chat file.", parent=self.root)
             return
 
         self.messages = read_chat_file(file_path)
@@ -88,9 +91,9 @@ class MainApplication(tk.Frame):
 
         people = 0
         for person, count in some_data.people.items():
-            tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 12") \
+            tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 14") \
                 .grid(row=people, column=0, padx=(0, 20), pady=(0, 10))
-            tk.Label(self.frm_canvas_frame, text=f"{count} messages", font="Times, 12") \
+            tk.Label(self.frm_canvas_frame, text=f"{count} messages", font="Times, 14") \
                 .grid(row=people, column=1, pady=(0, 10))
             people += 1
 
