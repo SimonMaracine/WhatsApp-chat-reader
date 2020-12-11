@@ -10,7 +10,7 @@ class MainApplication(tk.Frame):
     def __init__(self, root: tk.Tk):
         super().__init__(root)
         self.root = root
-        self.pack(fill="both", expand=True, padx=30, pady=30)
+        self.pack(fill="both", expand=True, padx=20, pady=20)
 
         self.root.option_add("*tearOff", False)
         self.root.title("WhatsApp Chat Reader")
@@ -28,7 +28,7 @@ class MainApplication(tk.Frame):
 
         # Main frames
         frm_people = tk.Frame(self, relief="ridge", bd=3)
-        frm_people.grid(row=0, column=0)
+        frm_people.grid(row=0, column=0, padx=(0, 5))
 
         frm_right_side = tk.Frame(self)
         frm_right_side.grid(row=0, column=1)
@@ -46,8 +46,21 @@ class MainApplication(tk.Frame):
         self.frm_canvas_frame.bind("<Configure>", lambda event: self.frame_configure())
 
         # Right side
-        tk.Label(frm_right_side, text="0 total messages", font="Times, 28").grid(row=0, column=0)
+        self.var_total_messages = tk.StringVar(frm_right_side, "0 total messages")
+        tk.Label(frm_right_side, textvariable=self.var_total_messages, font="Times, 28", wrap=220) \
+            .grid(row=0, column=0, pady=(0, 20))
 
+        frm_oldest_newest = tk.Frame(frm_right_side)
+        frm_oldest_newest.grid(row=1, column=0, pady=(0, 20))
+        self.var_oldest = tk.StringVar(frm_oldest_newest, "Oldest: n/a")
+        tk.Label(frm_oldest_newest, textvariable=self.var_oldest, font="Times, 12").grid(row=0, column=0)
+        self.var_newest = tk.StringVar(frm_oldest_newest, "Newest: n/a")
+        tk.Label(frm_oldest_newest, textvariable=self.var_newest, font="Times, 12").grid(row=1, column=0)
+
+        frm_buttons = tk.Frame(frm_right_side)
+        frm_buttons.grid(row=2, column=0)
+        tk.Button(frm_buttons, text="Timeline", command=None, font="Times, 12").grid(row=0, column=0, pady=(0, 8))
+        tk.Button(frm_buttons, text="Day", command=None, font="Times, 12").grid(row=1, column=0)
 
         self.messages: list[Message] = []
 
@@ -75,11 +88,15 @@ class MainApplication(tk.Frame):
 
         people = 0
         for person, count in some_data.people.items():
-            tk.Label(self.frm_canvas_frame, text=f"{person}").grid(row=people, column=0, padx=(0, 30))
-            tk.Label(self.frm_canvas_frame, text=f"{count} messages").grid(row=people, column=1)
+            tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 12") \
+                .grid(row=people, column=0, padx=(0, 20), pady=(0, 10))
+            tk.Label(self.frm_canvas_frame, text=f"{count} messages", font="Times, 12") \
+                .grid(row=people, column=1, pady=(0, 10))
             people += 1
 
-
+        self.var_total_messages.set(f"{some_data.total_messages} total messages")
+        self.var_oldest.set(f"Oldest: {str(some_data.oldest_message)[0:-3]}")
+        self.var_newest.set(f"Newest: {str(some_data.newest_message)[0:-3]}")
 
     def reset_UI(self):
         pass
