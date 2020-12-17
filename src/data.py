@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 from dataclasses import dataclass
+from pprint import pprint
 from typing import Optional
 
 
@@ -34,6 +35,43 @@ def retrieve_data(messages: list[Message]) -> ChatData:
         messages[0].date_time,
         messages[-1].date_time
     )
+
+
+def get_each_day(messages: list[Message]) -> dict[int, int]:
+    all_days = {}
+
+    last_datetime = messages[0].date_time  # Take first message's datetime
+    day_count = 0
+    messages_this_day = 0
+
+    for message in messages:
+        if message.date_time.day == last_datetime.day and \
+                message.date_time.month == last_datetime.month and \
+                message.date_time.year == last_datetime.year:
+            messages_this_day += 1
+        else:
+            # Insert previous day into hash map
+            all_days[day_count] = messages_this_day
+
+            # Set to 1, because this is a brand new day, so already a message
+            messages_this_day = 1
+            day_count += 1
+
+            # Check for empty days
+            days_passed = (message.date_time.date() - last_datetime.date()).days
+            if days_passed > 1:
+                for _ in range(days_passed - 1):  # Do the in-between days
+                    all_days[day_count] = 0
+                    day_count += 1
+
+        last_datetime = message.date_time
+
+    # Insert last day
+    all_days[day_count] = messages_this_day
+
+    pprint(all_days)
+
+    return all_days
 
 
 def is_chat(file_path: str) -> bool:

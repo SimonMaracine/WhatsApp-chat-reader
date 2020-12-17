@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 
 from data import read_chat_file, Message, retrieve_data, is_chat
+from plotting import timeline
 
 
 class MainApplication(tk.Frame):
@@ -60,14 +61,15 @@ class MainApplication(tk.Frame):
         self.var_newest = tk.StringVar(frm_oldest_newest, "Newest: n/a")
         tk.Label(frm_oldest_newest, textvariable=self.var_newest, font="Times, 13").grid(row=1, column=0)
 
+        self.var_days = tk.StringVar(frm_oldest_newest, "0 days")
+        tk.Label(frm_oldest_newest, textvariable=self.var_days, font="Times, 13").grid(row=2, column=0)
+
         frm_buttons = tk.Frame(frm_right_side)
         frm_buttons.grid(row=2, column=0)
-        tk.Button(frm_buttons, text="Timeline", command=None, font="Times, 13").grid(row=0, column=0, pady=(0, 8))
+        tk.Button(frm_buttons, text="Timeline", command=self.timeline, font="Times, 13").grid(row=0, column=0, pady=(0, 8))
         tk.Button(frm_buttons, text="Day", command=None, font="Times, 13").grid(row=1, column=0)
 
         self.messages: list[Message] = []
-
-        # self.messages = read_chat_file("../chats/WhatsApp Chat with +40 758 628 378.txt")
 
     def frame_configure(self):
         self.cvs_people.configure(scrollregion=self.cvs_people.bbox("all"))
@@ -87,22 +89,32 @@ class MainApplication(tk.Frame):
 
         self.reset_UI()
 
-        some_data = retrieve_data(self.messages)
+        data = retrieve_data(self.messages)
 
         people = 0
-        for person, count in some_data.people.items():
+        for person, count in data.people.items():
             tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 14") \
                 .grid(row=people, column=0, padx=(0, 20), pady=(0, 10))
             tk.Label(self.frm_canvas_frame, text=f"{count} messages", font="Times, 14") \
                 .grid(row=people, column=1, pady=(0, 10))
             people += 1
 
-        self.var_total_messages.set(f"{some_data.total_messages} total messages")
-        self.var_oldest.set(f"Oldest: {str(some_data.oldest_message)[0:-3]}")
-        self.var_newest.set(f"Newest: {str(some_data.newest_message)[0:-3]}")
+        self.var_total_messages.set(f"{data.total_messages} total messages")
+        self.var_oldest.set(f"Oldest: {str(data.oldest_message)[0:-3]}")
+        self.var_newest.set(f"Newest: {str(data.newest_message)[0:-3]}")
+        self.var_days.set(f"{(data.newest_message - data.oldest_message).days} days")
 
     def reset_UI(self):
-        pass
+        for widget in self.frm_canvas_frame.winfo_children():
+            widget.destroy()
+
+        self.var_total_messages.set("0 total messages")
+        self.var_oldest.set("Oldest: n/a")
+        self.var_newest.set("Newest: n/a")
+        self.var_days.set("0 days")
+
+    def timeline(self):
+        timeline(self.messages)
 
 
 def main():
