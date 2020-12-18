@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 
 from data import read_chat_file, Message, retrieve_data, is_chat
-from plotting import timeline
+from plotting import timeline, day, week
 
 
 class MainApplication(tk.Frame):
@@ -66,8 +66,10 @@ class MainApplication(tk.Frame):
 
         frm_buttons = tk.Frame(frm_right_side)
         frm_buttons.grid(row=2, column=0)
-        tk.Button(frm_buttons, text="Timeline", command=self.timeline, font="Times, 13").grid(row=0, column=0, pady=(0, 8))
-        tk.Button(frm_buttons, text="Day", command=None, font="Times, 13").grid(row=1, column=0)
+        tk.Button(frm_buttons, text="Timeline", command=self.timeline, font="Times, 13") \
+            .grid(row=0, column=0, columnspan=2, pady=(0, 8))
+        tk.Button(frm_buttons, text="Week", command=self.week, font="Times, 13").grid(row=1, column=0, padx=(0, 8))
+        tk.Button(frm_buttons, text="Day", command=self.day, font="Times, 13").grid(row=1, column=1)
 
         self.messages: list[Message] = []
 
@@ -102,7 +104,7 @@ class MainApplication(tk.Frame):
         self.var_total_messages.set(f"{data.total_messages} total messages")
         self.var_oldest.set(f"Oldest: {str(data.oldest_message)[0:-3]}")
         self.var_newest.set(f"Newest: {str(data.newest_message)[0:-3]}")
-        self.var_days.set(f"{(data.newest_message - data.oldest_message).days} days")
+        self.var_days.set(f"{(data.newest_message.date() - data.oldest_message.date()).days} days")
 
     def reset_UI(self):
         for widget in self.frm_canvas_frame.winfo_children():
@@ -114,7 +116,28 @@ class MainApplication(tk.Frame):
         self.var_days.set("0 days")
 
     def timeline(self):
-        timeline(self.messages)
+        if not self.messages:
+            print("Please open a chat", file=sys.stderr)
+            messagebox.showerror("No Chat Opened", "Please open a chat.", parent=self.root)
+            return
+
+        answer = messagebox.askquestion("Graph Type", "Do you want the graph of type 'bar'? The performance may be lower.")
+
+        timeline(self.messages, True if answer == "yes" else False)
+
+    def week(self):
+        if not self.messages:
+            messagebox.showerror("No Chat Opened", "Please open a chat.", parent=self.root)
+            return
+
+        week(self.messages)
+
+    def day(self):
+        if not self.messages:
+            messagebox.showerror("No Chat Opened", "Please open a chat.", parent=self.root)
+            return
+
+        day(self.messages)
 
 
 def main():

@@ -1,8 +1,17 @@
 import re
 from datetime import datetime
 from dataclasses import dataclass
-from pprint import pprint
 from typing import Optional
+
+HOUR_MAPPING = {
+    0: "00:00", 1: "01:00", 2: "02:00", 3: "03:00", 4: "04:00", 5: "05:00", 6: "06:00", 7: "07:00", 8: "08:00",
+    9: "09:00", 10: "10:00", 11: "11:00", 12: "12:00", 13: "13:00", 14: "14:00", 15: "15:00", 16: "16:00", 17: "17:00",
+    18: "18:00", 19: "19:00", 20: "20:00", 21: "21:00", 22: "22:00", 23: "23:00"
+}
+
+DAYS_MAPPING = {
+    0: "monday", 1: "tuesday", 2: "wednesday", 3: "thursday", 4: "friday", 5: "saturday", 6: "sunday"
+}
 
 
 @dataclass
@@ -37,7 +46,7 @@ def retrieve_data(messages: list[Message]) -> ChatData:
     )
 
 
-def get_each_day(messages: list[Message]) -> dict[int, int]:
+def get_timeline(messages: list[Message]) -> dict[int, int]:
     all_days = {}
 
     last_datetime = messages[0].date_time  # Take first message's datetime
@@ -69,9 +78,31 @@ def get_each_day(messages: list[Message]) -> dict[int, int]:
     # Insert last day
     all_days[day_count] = messages_this_day
 
-    pprint(all_days)
-
     return all_days
+
+
+def get_each_day(messages: list[Message]) -> dict[str, int]:
+    days = {
+        "monday": 0, "tuesday": 0, "wednesday": 0, "thursday": 0, "friday": 0, "saturday": 0, "sunday": 0
+    }
+
+    for message in messages:
+        days[DAYS_MAPPING[message.date_time.weekday()]] += 1
+
+    return days
+
+
+def get_each_hour(messages: list[Message]) -> dict[str, int]:
+    hours = {
+        "00:00": 0, "01:00": 0, "02:00": 0, "03:00": 0, "04:00": 0, "05:00": 0, "06:00": 0, "07:00": 0, "08:00": 0,
+        "09:00": 0, "10:00": 0, "11:00": 0, "12:00": 0, "13:00": 0, "14:00": 0, "15:00": 0, "16:00": 0, "17:00": 0,
+        "18:00": 0, "19:00": 0, "20:00": 0, "21:00": 0, "22:00": 0, "23:00": 0
+    }
+
+    for message in messages:
+        hours[HOUR_MAPPING[message.date_time.time().hour]] += 1
+
+    return hours
 
 
 def is_chat(file_path: str) -> bool:
