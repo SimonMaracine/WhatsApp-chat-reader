@@ -97,7 +97,7 @@ class MainApplication(tk.Frame):
         for person, count in data.people.items():
             tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 14") \
                 .grid(row=people, column=0, padx=(0, 20), pady=(0, 10))
-            tk.Label(self.frm_canvas_frame, text=f"{count} messages", font="Times, 14") \
+            tk.Label(self.frm_canvas_frame, text=f"{count} messages" if count > 1 else f"{count} message", font="Times, 14") \
                 .grid(row=people, column=1, pady=(0, 10))
             people += 1
 

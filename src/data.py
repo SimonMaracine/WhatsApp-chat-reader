@@ -1,7 +1,8 @@
 import re
 from datetime import datetime
 from dataclasses import dataclass
-from typing import Optional
+from collections import OrderedDict
+from typing import Optional, OrderedDict as OrderedDictType
 
 HOUR_MAPPING = {
     0: "00:00", 1: "01:00", 2: "02:00", 3: "03:00", 4: "04:00", 5: "05:00", 6: "06:00", 7: "07:00", 8: "08:00",
@@ -9,7 +10,7 @@ HOUR_MAPPING = {
     18: "18:00", 19: "19:00", 20: "20:00", 21: "21:00", 22: "22:00", 23: "23:00"
 }
 
-DAYS_MAPPING = {
+DAY_MAPPING = {
     0: "monday", 1: "tuesday", 2: "wednesday", 3: "thursday", 4: "friday", 5: "saturday", 6: "sunday"
 }
 
@@ -23,7 +24,7 @@ class Message:
 
 @dataclass
 class ChatData:
-    people: dict[str, int]
+    people: OrderedDictType[str, int]
     total_messages: int
     oldest_message: datetime
     newest_message: datetime
@@ -37,6 +38,9 @@ def retrieve_data(messages: list[Message]) -> ChatData:
             people[name] = 0
         else:
             people[name] += 1
+
+    ordered_dict = {k: v for k, v in reversed(sorted(people.items(), key=lambda item: item[1]))}
+    people = OrderedDict(ordered_dict)
 
     return ChatData(
         people,
@@ -87,7 +91,7 @@ def get_each_day(messages: list[Message]) -> dict[str, int]:
     }
 
     for message in messages:
-        days[DAYS_MAPPING[message.date_time.weekday()]] += 1
+        days[DAY_MAPPING[message.date_time.weekday()]] += 1
 
     return days
 
