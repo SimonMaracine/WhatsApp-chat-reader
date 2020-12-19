@@ -5,7 +5,7 @@ of messages, or the number of messages that was sent from each participant or di
 each day from the beginning, or the total number of messages on monday for example, or the total number of messages
 at 10:00 PM for each day.
 
-### Instructions
+### How To Use
 
 What you need to do is go to the chat you wish to examine, press on the **three dots in the top-right corner -> More
 -> Export chat**. Then select **WITHOUT MEDIA** and send yourself an email with the chat file as the attachment.
@@ -13,4 +13,5 @@ Then go to your computer, download the file and open it in the program. That's i
 
 ### Other
 
-The project was made with and was tested on Python 3.9.
+The project was made with and was tested on Python 3.9.  
+It works on Linux and Windows.
