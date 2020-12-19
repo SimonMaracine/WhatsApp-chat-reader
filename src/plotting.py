@@ -47,7 +47,7 @@ def day(messages: list[Message]):
     hours = list(each_hour.keys())
     messages_count = list(each_hour.values())
 
-    fig, ax = plt.subplots(figsize=(16, 5))
+    fig, ax = plt.subplots(figsize=(15, 5))
     ax.bar(hours, messages_count)
 
     plt.xlabel("Hour")

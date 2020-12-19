@@ -35,7 +35,11 @@ class MainApplication(tk.Frame):
         frm_people.grid(row=0, column=0, padx=(0, 5), sticky="nsew")
 
         frm_right_side = tk.Frame(self)
-        frm_right_side.grid(row=0, column=1)
+        frm_right_side.grid(row=0, column=1, sticky="nsew")
+        frm_right_side.columnconfigure(0, weight=1)
+        frm_right_side.rowconfigure(0, weight=1)
+        frm_right_side.rowconfigure(1, weight=1)
+        frm_right_side.rowconfigure(2, weight=1)
 
         # Left side
         bar_people = tk.Scrollbar(frm_people, orient="vertical")
@@ -82,12 +86,23 @@ class MainApplication(tk.Frame):
         if not file_path:
             return
 
-        if not is_chat(file_path):
-            print("This is not a chat file", file=sys.stderr)
-            messagebox.showerror("Invalid Chat", "This is not a chat file.", parent=self.root)
+        try:
+            if not is_chat(file_path):
+                print("This is not a chat file", file=sys.stderr)
+                messagebox.showerror("Invalid Chat", "This is not a chat file.", parent=self.root)
+                return
+        except OSError:
+            messagebox.showerror("Some Error", "There is an error opening this file.", parent=self.root)
             return
 
-        self.messages = read_chat_file(file_path)
+        try:
+            self.messages = read_chat_file(file_path)
+        except OSError:
+            messagebox.showerror("Some Error", "There is an error opening this file.", parent=self.root)
+            return
+        except RuntimeError:
+            messagebox.showerror("File Error", "The chat file is corrupted.", parent=self.root)
+            return
 
         self.reset_UI()
 
@@ -97,8 +112,11 @@ class MainApplication(tk.Frame):
         for person, count in data.people.items():
             tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 14") \
                 .grid(row=people, column=0, padx=(0, 20), pady=(0, 10))
-            tk.Label(self.frm_canvas_frame, text=f"{count} messages" if count > 1 else f"{count} message", font="Times, 14") \
+
+            text = f"{count} messages" if count > 1 else "1 message"
+            tk.Label(self.frm_canvas_frame, text=text, font="Times, 14") \
                 .grid(row=people, column=1, pady=(0, 10))
+
             people += 1
 
         self.var_total_messages.set(f"{data.total_messages} total messages")
@@ -127,6 +145,7 @@ class MainApplication(tk.Frame):
 
     def week(self):
         if not self.messages:
+            print("Please open a chat", file=sys.stderr)
             messagebox.showerror("No Chat Opened", "Please open a chat.", parent=self.root)
             return
 
@@ -134,6 +153,7 @@ class MainApplication(tk.Frame):
 
     def day(self):
         if not self.messages:
+            print("Please open a chat", file=sys.stderr)
             messagebox.showerror("No Chat Opened", "Please open a chat.", parent=self.root)
             return
 

@@ -1,4 +1,5 @@
 import re
+import sys
 from datetime import datetime
 from dataclasses import dataclass
 from collections import OrderedDict
@@ -110,25 +111,35 @@ def get_each_hour(messages: list[Message]) -> dict[str, int]:
 
 
 def is_chat(file_path: str) -> bool:
-    with open(file_path, "r") as file:
-        first_line = file.readline()
-        match = re.match("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{2} (PM|AM) - ", first_line)
+    try:
+        with open(file_path, "r") as file:
+            first_line = file.readline()
+            match = re.match("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{2} (PM|AM) - ", first_line)
 
-        if match is not None:
-            return True
-        else:
-            return False
+            if match is not None:
+                return True
+            else:
+                return False
+    except OSError as err:
+        print(err, file=sys.stderr)
+        raise
 
 
 def read_chat_file(file: str) -> list[Message]:
     messages = []
 
-    with open(file, "r") as file:
-        while line := file.readline():
-            message = _parse_line(line, messages)
-            if message is not None:
-                messages.append(message)
-                print(message)
+    try:
+        with open(file, "r") as file:
+            while line := file.readline():
+                message = _parse_line(line, messages)
+                if message is not None:
+                    messages.append(message)
+    except OSError as err:
+        print(err, file=sys.stderr)
+        raise
+    except RuntimeError as err:  # Catch my own errors
+        print(err, file=sys.stderr)
+        raise
 
     return messages
 
