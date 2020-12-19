@@ -4,6 +4,7 @@ from tkinter import filedialog, messagebox
 
 from data import read_chat_file, Message, retrieve_data, is_chat
 from plotting import timeline, day, week
+from about import About
 
 
 class MainApplication(tk.Frame):
@@ -23,7 +24,7 @@ class MainApplication(tk.Frame):
         men_file.add_command(label="Open Chat", command=self.open_chat)
 
         men_help = tk.Menu(self)
-        men_help.add_command(label="About", command=None)
+        men_help.add_command(label="About", command=self.about)
 
         men_main = tk.Menu(self)
         men_main.add_cascade(label="File", menu=men_file)
@@ -161,6 +162,11 @@ class MainApplication(tk.Frame):
             return
 
         day(self.messages)
+
+    @staticmethod
+    def about():
+        top_level = tk.Toplevel()
+        About(top_level)
 
 
 def main():
