@@ -5,7 +5,7 @@ from data import Message, get_timeline, get_each_day, get_each_hour
 
 def timeline(messages: list[Message], is_bar: bool, days: int):
     all_days, dates = get_timeline(messages, days)
-    days = list(all_days.keys())
+    days_count = list(all_days.keys())
     messages_count = list(all_days.values())
 
     fig = plt.figure(figsize=(9, 5))
@@ -13,9 +13,9 @@ def timeline(messages: list[Message], is_bar: bool, days: int):
     ax2 = ax1.twiny()
 
     if is_bar:
-        ax1.bar(days, messages_count)
+        ax1.bar(days_count, messages_count)
     else:
-        ax1.plot(days, messages_count)
+        ax1.plot(days_count, messages_count)
 
     ax2.set_xlim(ax1.get_xlim())
     ax2.set_xticks(list(dates.keys()))

@@ -5,13 +5,13 @@ from dataclasses import dataclass
 from collections import OrderedDict
 from typing import Optional, OrderedDict as OrderedDictType
 
-HOUR_MAPPING = {
+_HOUR_MAPPING = {
     0: "00:00", 1: "01:00", 2: "02:00", 3: "03:00", 4: "04:00", 5: "05:00", 6: "06:00", 7: "07:00", 8: "08:00",
     9: "09:00", 10: "10:00", 11: "11:00", 12: "12:00", 13: "13:00", 14: "14:00", 15: "15:00", 16: "16:00", 17: "17:00",
     18: "18:00", 19: "19:00", 20: "20:00", 21: "21:00", 22: "22:00", 23: "23:00"
 }
 
-DAY_MAPPING = {
+_DAY_MAPPING = {
     0: "monday", 1: "tuesday", 2: "wednesday", 3: "thursday", 4: "friday", 5: "saturday", 6: "sunday"
 }
 
@@ -106,7 +106,7 @@ def get_each_day(messages: list[Message]) -> OrderedDictType[str, int]:
     days = OrderedDict(days)
 
     for message in messages:
-        days[DAY_MAPPING[message.date_time.weekday()]] += 1
+        days[_DAY_MAPPING[message.date_time.weekday()]] += 1
 
     return days
 
@@ -120,7 +120,7 @@ def get_each_hour(messages: list[Message]) -> OrderedDictType[str, int]:
     hours = OrderedDict(hours)
 
     for message in messages:
-        hours[HOUR_MAPPING[message.date_time.time().hour]] += 1
+        hours[_HOUR_MAPPING[message.date_time.time().hour]] += 1
 
     return hours
 
