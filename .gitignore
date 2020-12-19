@@ -2,3 +2,6 @@
 env/
 chats/
 __pycache__/
+build/
+dist/
+WhatsApp-Chat-Reader.spec

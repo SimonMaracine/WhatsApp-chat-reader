@@ -1,0 +1,1 @@
+python -m PyInstaller src/main.py --name WhatsApp-Chat-Reader --onefile --windowed
