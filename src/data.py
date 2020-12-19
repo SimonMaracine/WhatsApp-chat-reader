@@ -51,12 +51,17 @@ def retrieve_data(messages: list[Message]) -> ChatData:
     )
 
 
-def get_timeline(messages: list[Message]) -> dict[int, int]:
-    all_days = {}
+def get_timeline(messages: list[Message], days: int) -> tuple[OrderedDictType[int, int], OrderedDictType[int, str]]:
+    all_days = OrderedDict()
+    dates = OrderedDict()
+    date_interval = days // 4
 
     last_datetime = messages[0].date_time  # Take first message's datetime
     day_count = 0
     messages_this_day = 0
+
+    # Insert first date
+    dates[day_count] = str(messages[0].date_time.date())
 
     for message in messages:
         if message.date_time.day == last_datetime.day and \
@@ -71,6 +76,10 @@ def get_timeline(messages: list[Message]) -> dict[int, int]:
             messages_this_day = 1
             day_count += 1
 
+            # Insert date at this day
+            if day_count % date_interval == 0:
+                dates[day_count] = str(message.date_time.date())
+
             # Check for empty days
             days_passed = (message.date_time.date() - last_datetime.date()).days
             if days_passed > 1:
@@ -78,18 +87,23 @@ def get_timeline(messages: list[Message]) -> dict[int, int]:
                     all_days[day_count] = 0
                     day_count += 1
 
+                    # Insert date at this day (repeat as above)
+                    if day_count % date_interval == 0:
+                        dates[day_count] = str(message.date_time.date())
+
         last_datetime = message.date_time
 
-    # Insert last day
+    # Insert last day into hash map
     all_days[day_count] = messages_this_day
 
-    return all_days
+    return all_days, dates
 
 
-def get_each_day(messages: list[Message]) -> dict[str, int]:
+def get_each_day(messages: list[Message]) -> OrderedDictType[str, int]:
     days = {
         "monday": 0, "tuesday": 0, "wednesday": 0, "thursday": 0, "friday": 0, "saturday": 0, "sunday": 0
     }
+    days = OrderedDict(days)
 
     for message in messages:
         days[DAY_MAPPING[message.date_time.weekday()]] += 1
@@ -97,12 +111,13 @@ def get_each_day(messages: list[Message]) -> dict[str, int]:
     return days
 
 
-def get_each_hour(messages: list[Message]) -> dict[str, int]:
+def get_each_hour(messages: list[Message]) -> OrderedDictType[str, int]:
     hours = {
         "00:00": 0, "01:00": 0, "02:00": 0, "03:00": 0, "04:00": 0, "05:00": 0, "06:00": 0, "07:00": 0, "08:00": 0,
         "09:00": 0, "10:00": 0, "11:00": 0, "12:00": 0, "13:00": 0, "14:00": 0, "15:00": 0, "16:00": 0, "17:00": 0,
         "18:00": 0, "19:00": 0, "20:00": 0, "21:00": 0, "22:00": 0, "23:00": 0
     }
+    hours = OrderedDict(hours)
 
     for message in messages:
         hours[HOUR_MAPPING[message.date_time.time().hour]] += 1
