@@ -127,7 +127,7 @@ def get_each_hour(messages: list[Message]) -> OrderedDictType[str, int]:
 
 def is_chat(file_path: str) -> bool:
     try:
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding="utf8") as file:
             first_line = file.readline()
             match = re.match("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{2} (PM|AM) - ", first_line)
 
@@ -144,7 +144,7 @@ def read_chat_file(file: str) -> list[Message]:
     messages = []
 
     try:
-        with open(file, "r") as file:
+        with open(file, "r", encoding="utf8") as file:
             while line := file.readline():
                 message = _parse_line(line, messages)
                 if message is not None:
