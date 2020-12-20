@@ -13,5 +13,13 @@ Then go to your computer, download the file and open it in the program. That's i
 
 ### Other
 
-The project was made with and was tested on Python 3.9.  
-It works on Linux and Windows.
+Do note that WhatsApp is a little limited and it only gives you the last 40,000 messages, if there are more than 40,000
+in the chat.
+
+If WhatsApp changes the format of the chat file it gives you, then this program will no longer work. It works as of
+December 2020. It may no longer work in the future, if WhatsApp makes changes.
+
+The program will not work correctly and will display incorrect information, if the name of the participants in the chat contain the ":" (colon) character.
+It's simply an unsolvable problem.
+
+For developers: The project was made with and was tested on Python 3.9. It works on Linux and Windows.
