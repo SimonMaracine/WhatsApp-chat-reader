@@ -13,7 +13,7 @@ Then go to your computer, download the file and open it in the program. That's i
 
 ### Other
 
-Do note that WhatsApp is a little limited and it only gives you the last 40,000 messages, if there are more than 40,000
+Do note that WhatsApp is a little limited, and it only gives you the last 40,000 messages, if there are more than 40,000
 in the chat.
 
 If WhatsApp changes the format of the chat file it gives you, then this program will no longer work. It works as of
