@@ -2,6 +2,7 @@ import re
 import sys
 from datetime import datetime
 from dataclasses import dataclass
+from enum import Enum, auto
 from collections import OrderedDict
 from typing import Optional, OrderedDict as OrderedDictType
 
@@ -14,6 +15,19 @@ _HOUR_MAPPING = {
 _DAY_MAPPING = {
     0: "monday", 1: "tuesday", 2: "wednesday", 3: "thursday", 4: "friday", 5: "saturday", 6: "sunday"
 }
+
+
+class TimelineMode(Enum):
+    WHOLE = auto()
+    HALF = auto()
+    QUARTER = auto()
+
+
+class TimelinePart(Enum):
+    FIRST = auto()
+    SECOND = auto()
+    THIRD = auto()
+    FOURTH = auto()
 
 
 @dataclass
@@ -51,50 +65,86 @@ def retrieve_data(messages: list[Message]) -> ChatData:
     )
 
 
-def get_timeline(messages: list[Message], days: int) -> tuple[OrderedDictType[int, int], OrderedDictType[int, str]]:
-    all_days = OrderedDict()
-    dates = OrderedDict()
-    date_interval = days // 4
+def get_timeline(messages: list[Message], days: int, mode: TimelineMode, part: Optional[TimelinePart] = None) \
+        -> tuple[OrderedDictType[int, tuple[int, datetime]], OrderedDictType[int, str]]:  # TODO remove 'days', if not needed
+    all_days: OrderedDictType[int, tuple[int, datetime]] = OrderedDict()
+    dates: OrderedDictType[int, str] = OrderedDict()
 
-    last_datetime = messages[0].date_time  # Take first message's datetime
+    if mode is TimelineMode.WHOLE:
+        start = 0
+        end = len(messages)
+    elif mode is TimelineMode.HALF:
+        if part is TimelinePart.FIRST:
+            start = 0
+            end = len(messages) // 2
+        elif part is TimelinePart.SECOND:
+            start = len(messages) // 2
+            end = len(messages)
+        else:
+            raise RuntimeError("Invalid timeline part")
+    elif mode is TimelineMode.QUARTER:
+        if part is TimelinePart.FIRST:
+            start = 0
+            end = len(messages) // 4
+        elif part is TimelinePart.SECOND:
+            start = len(messages) // 4
+            end = (len(messages) // 4) * 2
+        elif part is TimelinePart.THIRD:
+            start = (len(messages) // 4) * 2
+            end = (len(messages) // 4) * 3
+        elif part is TimelinePart.FOURTH:
+            start = (len(messages) // 4) * 3
+            end = len(messages)
+        else:
+            raise RuntimeError("Invalid timeline part")
+    else:
+        raise RuntimeError("Invalid timeline mode")
+
+    last_datetime = messages[0].date_time  # Take first message's datetime to begin with
     day_count = 0
     messages_this_day = 0
+    first_day_in_dict = -1  # To remember the from which the graph begins
 
-    # Insert first date
-    dates[day_count] = str(messages[0].date_time.date())
-
-    for message in messages:
+    i = 0  # Declare here, because might be referenced before assignment (maybe)
+    for i, message in enumerate(messages):
         if message.date_time.day == last_datetime.day and \
                 message.date_time.month == last_datetime.month and \
                 message.date_time.year == last_datetime.year:
+            if i == end:
+                break
             messages_this_day += 1
         else:
-            # Insert previous day into hash map
-            all_days[day_count] = messages_this_day
+            if start <= i:
+                # Insert previous day into hash map
+                all_days[day_count] = (messages_this_day, messages[i - 1].date_time)
+                if first_day_in_dict == -1:
+                    first_day_in_dict = day_count
+
+                if i == end:
+                    break
 
             # Set to 1, because this is a brand new day, so already a message
             messages_this_day = 1
             day_count += 1
 
-            # Insert date at this day
-            if day_count % date_interval == 0:
-                dates[day_count] = str(message.date_time.date())
-
             # Check for empty days
             days_passed = (message.date_time.date() - last_datetime.date()).days
             if days_passed > 1:
-                for _ in range(days_passed - 1):  # Do the in-between days
-                    all_days[day_count] = 0
+                for _ in range(days_passed - 1):  # Do the in-between empty days
+                    if start <= i:
+                        all_days[day_count] = (0, messages[i - 1].date_time)
                     day_count += 1
-
-                    # Insert date at this day (repeat as above)
-                    if day_count % date_interval == 0:
-                        dates[day_count] = str(message.date_time.date())
 
         last_datetime = message.date_time
 
     # Insert last day into hash map
-    all_days[day_count] = messages_this_day
+    all_days[day_count] = (messages_this_day, messages[i - 1].date_time)
+
+    # Insert first and last date
+    dates[first_day_in_dict] = str(messages[start].date_time.date())
+    dates[day_count] = str(messages[end - 1].date_time.date())
+
+    all_days = OrderedDict({key: value[0] for key, value in all_days.items()})
 
     return all_days, dates
 

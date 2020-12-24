@@ -3,8 +3,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 
 from data import read_chat_file, Message, retrieve_data, is_chat
-from plotting import timeline, day, week
+from plotting import day, week
 from about import About
+from choose_timeline import ChooseTimeline
 
 
 class MainApplication(tk.Frame):
@@ -77,7 +78,7 @@ class MainApplication(tk.Frame):
         tk.Button(frm_buttons, text="Day", command=self.day, font="Times, 13").grid(row=1, column=1)
 
         self.messages: list[Message] = []
-        self.days = 0  # Needed by timeline
+        self.days = 0  # Needed by timeline; it's the total number of days from the first to the lst message
 
     def frame_configure(self):
         self.cvs_people.configure(scrollregion=self.cvs_people.bbox("all"))
@@ -143,9 +144,8 @@ class MainApplication(tk.Frame):
             messagebox.showerror("No Chat Opened", "Please open a chat.", parent=self.root)
             return
 
-        answer = messagebox.askquestion("Graph Type", "Do you want the graph of type 'bar'? The performance may be lower.")
-
-        timeline(self.messages, True if answer == "yes" else False, self.days)
+        top_level = tk.Toplevel()
+        ChooseTimeline(top_level, self.messages, self.days)
 
     def week(self):
         if not self.messages:
