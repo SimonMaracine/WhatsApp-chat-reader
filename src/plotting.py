@@ -5,10 +5,10 @@ import matplotlib.pyplot as plt
 from data import Message, get_timeline, get_each_day, get_each_hour, TimelineMode, TimelinePart
 
 
-def timeline(messages: list[Message], is_bar: bool, days: int, mode: TimelineMode, part: Optional[TimelinePart] = None):
-    all_days, dates = get_timeline(messages, days, mode, part)
-    days_count = list(all_days.keys())
-    messages_count = list(all_days.values())
+def timeline(messages: list[Message], is_bar: bool, mode: TimelineMode, part: Optional[TimelinePart] = None):
+    days, dates = get_timeline(messages, mode, part)
+    days_count = list(days.keys())
+    messages_count = list(days.values())
 
     fig = plt.figure(figsize=(9, 5))
     ax1 = fig.add_subplot(111)

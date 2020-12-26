@@ -78,7 +78,6 @@ class MainApplication(tk.Frame):
         tk.Button(frm_buttons, text="Day", command=self.day, font="Times, 13").grid(row=1, column=1)
 
         self.messages: list[Message] = []
-        self.days = 0  # Needed by timeline; it's the total number of days from the first to the lst message
 
     def frame_configure(self):
         self.cvs_people.configure(scrollregion=self.cvs_people.bbox("all"))
@@ -111,8 +110,6 @@ class MainApplication(tk.Frame):
 
         data = retrieve_data(self.messages)
 
-        self.days = (data.newest_message.date() - data.oldest_message.date()).days
-
         people = 0
         for person, count in data.people.items():
             tk.Label(self.frm_canvas_frame, text=f"{person}", font="Times, 14") \
@@ -127,7 +124,7 @@ class MainApplication(tk.Frame):
         self.var_total_messages.set(f"{data.total_messages} total messages")
         self.var_oldest.set(f"Oldest: {str(data.oldest_message)[0:-3]}")
         self.var_newest.set(f"Newest: {str(data.newest_message)[0:-3]}")
-        self.var_days.set(f"{self.days} days")
+        self.var_days.set(f"{(data.newest_message.date() - data.oldest_message.date()).days} days")
 
     def reset_UI(self):
         for widget in self.frm_canvas_frame.winfo_children():
@@ -145,7 +142,7 @@ class MainApplication(tk.Frame):
             return
 
         top_level = tk.Toplevel()
-        ChooseTimeline(top_level, self.messages, self.days)
+        ChooseTimeline(top_level, self.messages)
 
     def week(self):
         if not self.messages:

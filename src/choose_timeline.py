@@ -6,11 +6,10 @@ from data import Message, TimelineMode, TimelinePart
 
 class ChooseTimeline(tk.Frame):
 
-    def __init__(self, top_level: tk.Toplevel, messages: list[Message], days: int):
+    def __init__(self, top_level: tk.Toplevel, messages: list[Message]):
         super().__init__(top_level)
         self.top_level = top_level
         self.messages = messages
-        self.days = days
         self.pack(padx=10, pady=10, expand=True)
 
         self.top_level.title("Select Timeline")
@@ -36,22 +35,22 @@ class ChooseTimeline(tk.Frame):
         tk.Button(frm_buttons, text="Quarter 4", command=self.quarter4).grid(row=2, column=3)
 
     def whole(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.WHOLE)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.WHOLE)
 
     def half1(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.HALF, TimelinePart.FIRST)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.HALF, TimelinePart.FIRST)
 
     def half2(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.HALF, TimelinePart.SECOND)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.HALF, TimelinePart.SECOND)
 
     def quarter1(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.QUARTER, TimelinePart.FIRST)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.QUARTER, TimelinePart.FIRST)
 
     def quarter2(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.QUARTER, TimelinePart.SECOND)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.QUARTER, TimelinePart.SECOND)
 
     def quarter3(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.QUARTER, TimelinePart.THIRD)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.QUARTER, TimelinePart.THIRD)
 
     def quarter4(self):
-        timeline(self.messages, self.var_mode.get(), self.days, TimelineMode.QUARTER, TimelinePart.FOURTH)
+        timeline(self.messages, self.var_mode.get(), TimelineMode.QUARTER, TimelinePart.FOURTH)

@@ -4,7 +4,7 @@ from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum, auto
 from collections import OrderedDict
-from typing import Optional, OrderedDict as OrderedDictType
+from typing import Optional, OrderedDict as OrderedDictType, Final
 
 _HOUR_MAPPING = {
     0: "00:00", 1: "01:00", 2: "02:00", 3: "03:00", 4: "04:00", 5: "05:00", 6: "06:00", 7: "07:00", 8: "08:00",
@@ -65,9 +65,9 @@ def retrieve_data(messages: list[Message]) -> ChatData:
     )
 
 
-def get_timeline(messages: list[Message], days: int, mode: TimelineMode, part: Optional[TimelinePart] = None) \
-        -> tuple[OrderedDictType[int, tuple[int, datetime]], OrderedDictType[int, str]]:  # TODO remove 'days', if not needed
-    all_days: OrderedDictType[int, tuple[int, datetime]] = OrderedDict()
+def get_timeline(messages: list[Message], mode: TimelineMode, part: Optional[TimelinePart] = None) \
+        -> tuple[OrderedDictType[int, int], OrderedDictType[int, str]]:
+    days: OrderedDictType[int, int] = OrderedDict()
     dates: OrderedDictType[int, str] = OrderedDict()
 
     if mode is TimelineMode.WHOLE:
@@ -103,25 +103,21 @@ def get_timeline(messages: list[Message], days: int, mode: TimelineMode, part: O
     last_datetime = messages[0].date_time  # Take first message's datetime to begin with
     day_count = 0
     messages_this_day = 0
-    first_day_in_dict = -1  # To remember the from which the graph begins
+    first_day_in_dict = -1  # To remember the day from which the graph begins
 
-    i = 0  # Declare here, because might be referenced before assignment (maybe)
     for i, message in enumerate(messages):
         if message.date_time.day == last_datetime.day and \
                 message.date_time.month == last_datetime.month and \
                 message.date_time.year == last_datetime.year:
+            messages_this_day += 1
             if i == end:
                 break
-            messages_this_day += 1
         else:
             if start <= i:
                 # Insert previous day into hash map
-                all_days[day_count] = (messages_this_day, messages[i - 1].date_time)
+                days[day_count] = messages_this_day
                 if first_day_in_dict == -1:
                     first_day_in_dict = day_count
-
-                if i == end:
-                    break
 
             # Set to 1, because this is a brand new day, so already a message
             messages_this_day = 1
@@ -132,21 +128,77 @@ def get_timeline(messages: list[Message], days: int, mode: TimelineMode, part: O
             if days_passed > 1:
                 for _ in range(days_passed - 1):  # Do the in-between empty days
                     if start <= i:
-                        all_days[day_count] = (0, messages[i - 1].date_time)
+                        days[day_count] = 0
                     day_count += 1
+
+            if i == end:
+                break
 
         last_datetime = message.date_time
 
     # Insert last day into hash map
-    all_days[day_count] = (messages_this_day, messages[i - 1].date_time)
+    days[day_count] = messages_this_day
 
     # Insert first and last date
     dates[first_day_in_dict] = str(messages[start].date_time.date())
     dates[day_count] = str(messages[end - 1].date_time.date())
 
-    all_days = OrderedDict({key: value[0] for key, value in all_days.items()})
+    # Do this loop again to insert remaining dates
+    date_interval: Final[int] = round(len(days) / 4)
+    dates_inserted = 0
+    days_since_last_date = 0
+    day_count_from_zero = 0  # In a smaller graph this doesn't start from where it would start in the whole graph
 
-    return all_days, dates
+    last_datetime = messages[0].date_time
+    day_count = 0
+    messages_this_day = 0
+
+    for i, message in enumerate(messages):
+        if message.date_time.day == last_datetime.day and \
+                message.date_time.month == last_datetime.month and \
+                message.date_time.year == last_datetime.year:
+            messages_this_day += 1
+
+            if start <= i:
+                # Check for date insertion
+                if day_count_from_zero > date_interval * (dates_inserted + 1):
+                    if days_since_last_date >= date_interval and len(days) - day_count_from_zero >= date_interval:
+                        dates[day_count] = str(message.date_time.date())
+                        dates_inserted += 1
+                        days_since_last_date = 0
+
+            if i == end:
+                break
+        else:
+            messages_this_day = 1
+            day_count += 1
+            days_since_last_date += 1
+
+            if start <= i:
+                day_count_from_zero += 1
+
+                if messages_this_day > 1:
+                    # Check for date insertion, same as above
+                    if day_count_from_zero > date_interval * (dates_inserted + 1):
+                        if days_since_last_date >= date_interval and len(days) - day_count_from_zero >= date_interval:
+                            dates[day_count] = str(message.date_time.date())
+                            dates_inserted += 1
+                            days_since_last_date = 0
+
+            days_passed = (message.date_time.date() - last_datetime.date()).days
+            if days_passed > 1:
+                for _ in range(days_passed - 1):
+                    if start <= i:
+                        day_count_from_zero += 1
+                    day_count += 1
+                    days_since_last_date += 1
+
+            if i == end:
+                break
+
+        last_datetime = message.date_time
+
+    return days, dates
 
 
 def get_each_day(messages: list[Message]) -> OrderedDictType[str, int]:
