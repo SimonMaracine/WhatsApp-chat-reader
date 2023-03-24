@@ -2,9 +2,11 @@ import sys
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-from data import read_chat_file, Message, retrieve_data, is_chat
+from data import read_chat_file, Message, retrieve_data, is_chat, get_number_of_times_character_appears
 from plotting import day, week
 from about import About
+from filter import Filter
+from count import Count
 from choose_timeline import ChooseTimeline
 
 
@@ -24,11 +26,16 @@ class MainApplication(tk.Frame):
         men_file = tk.Menu(self)
         men_file.add_command(label="Open Chat", command=self.open_chat)
 
+        men_tools = tk.Menu(self)
+        men_tools.add_command(label="Count", command=self.count)
+        men_tools.add_command(label="Filter By Person Name", command=self.filter)
+
         men_help = tk.Menu(self)
-        men_help.add_command(label="About", command=self.about)
+        men_help.add_command(label="About", command=MainApplication.about)
 
         men_main = tk.Menu(self)
         men_main.add_cascade(label="File", menu=men_file)
+        men_main.add_cascade(label="Tools", menu=men_tools)
         men_main.add_cascade(label="Help", menu=men_help)
         self.root.configure(menu=men_main)
 
@@ -126,6 +133,8 @@ class MainApplication(tk.Frame):
         self.var_newest.set(f"Newest: {str(data.newest_message)[0:-3]}")
         self.var_days.set(f"{(data.newest_message.date() - data.oldest_message.date()).days} days")
 
+        # print("Smileys:", get_number_of_times_character_appears(self.messages, 0x1f917))
+
     def reset_UI(self):
         for widget in self.frm_canvas_frame.winfo_children():
             widget.destroy()
@@ -159,6 +168,14 @@ class MainApplication(tk.Frame):
             return
 
         day(self.messages)
+
+    def count(self):
+        top_level = tk.Toplevel()
+        Count(top_level, self.messages)
+
+    def filter(self):
+        top_level = tk.Toplevel()
+        Filter(top_level, self.messages)
 
     @staticmethod
     def about():

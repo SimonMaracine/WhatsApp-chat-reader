@@ -45,6 +45,35 @@ class ChatData:
     newest_message: datetime
 
 
+def get_number_of_times_character_appears(messages: list[Message], character: int) -> int:
+    count = 0
+
+    for message in messages:
+        count += message.message.count(chr(character))
+
+    return count
+
+
+def get_number_of_times_text_appears(messages: list[Message], text: str) -> int:
+    count = 0
+
+    for message in messages:
+        count += message.message.count(text)
+
+    return count
+
+
+def get_all_messages_from_person(messages: list[Message], person_name: str) -> list[Message]:
+    return list(filter(lambda message: message.person_name == person_name, messages))
+
+
+def write_messages_to_file(file_name: str, messages: list[Message]):
+    with open(file_name, "w") as file:
+        for message in messages:
+            file.write(str(message))
+            file.write("\n")
+
+
 def retrieve_data(messages: list[Message]) -> ChatData:
     people = {}
     for message in messages:
@@ -263,7 +292,7 @@ def read_chat_file(file: str) -> list[Message]:
 
 def _parse_line(line: str, messages: list[Message]) -> Optional[Message]:
     # Check to see if this is a message line
-    match = re.match("^[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{2} (PM|AM) - ", line)
+    match = re.match(r"[0-9]{1,2}/[0-9]{1,2}/[0-9]{2}, [0-9]{1,2}:[0-9]{2}[  ](PM|AM) - ", line)
 
     # If there is no match, then this line is the continuation of the last message
     if match is None:
@@ -275,7 +304,8 @@ def _parse_line(line: str, messages: list[Message]) -> Optional[Message]:
         raise RuntimeError("Chat file is corrupted")
 
     message_info_str = line[0:hypen_pos]
-    message_info: list = message_info_str.split(" ")
+    # message_info: list = message_info_str.split(" ")
+    message_info: list = re.split(r"[  ]", message_info_str)  # Split at ASCII space or that other Unicode space
     date: str = message_info[0].rstrip(",")
     time: str = message_info[1]
     meridian: str = message_info[2]
